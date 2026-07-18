@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0e7490">
+<title>頭痛ダイアリー</title>
+<style>
+  :root {
+    --teal: #0e7490;
+    --teal-dark: #155e75;
+    --teal-light: #ecfeff;
+    --red: #dc2626;
+    --orange: #ea580c;
+    --amber: #d97706;
+    --green: #16a34a;
+    --gray: #6b7280;
+    --bg: #f3f6f8;
+    --card: #ffffff;
+    --border: #d9e2e8;
+    --text: #1f2937;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: calc(70px + env(safe-area-inset-bottom));
+  }
+  header.appbar {
+    background: var(--teal);
+    color: #fff;
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header.appbar h1 { font-size: 18px; margin: 0; font-weight: 700; }
+  .container { padding: 12px; max-width: 640px; margin: 0 auto; }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .card h2 {
+    font-size: 15px;
+    margin: 0 0 10px;
+    color: var(--teal-dark);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card h2 .hint { font-size: 11px; color: var(--gray); font-weight: normal; }
+
+  /* date nav */
+  .datenav { display: flex; align-items: center; gap: 8px; }
+  .datenav button {
+    background: rgba(255,255,255,.2);
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+  }
+  .datenav input[type="date"] {
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.4);
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 15px;
+    font-family: inherit;
+  }
+
+  /* timeline */
+  .timeline-wrap { overflow-x: auto; }
+  svg.timeline { width: 100%; height: auto; display: block; }
+
+  /* buttons */
+  button { font-family: inherit; cursor: pointer; }
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .btn-primary { background: var(--teal); color: #fff; width: 100%; }
+  .btn-outline { background: #fff; color: var(--teal); border: 1.5px solid var(--teal); }
+  .btn-small { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
+
+  /* level selector */
+  .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .level-btn {
+    border: 2px solid var(--border);
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .level-btn .mark { font-size: 18px; line-height: 1; }
+  .level-btn.sel-0 { border-color: var(--green); color: var(--green); background: #f0fdf4; }
+  .level-btn.sel-1 { border-color: var(--amber); color: var(--amber); background: #fffbeb; }
+  .level-btn.sel-2 { border-color: var(--orange); color: var(--orange); background: #fff7ed; }
+  .level-btn.sel-3 { border-color: var(--red); color: var(--red); background: #fef2f2; }
+
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > * { min-width: 0; }
+  input[type="time"], input[type="text"], input[type="number"], select, textarea {
+    font-family: inherit;
+    font-size: 16px; /* prevent iOS zoom */
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    background: #fff;
+    color: var(--text);
+    width: 100%;
+  }
+  textarea { resize: vertical; min-height: 72px; }
+  label.field { display: block; font-size: 12px; color: var(--gray); margin-bottom: 4px; font-weight: 600; }
+
+  /* entry list */
+  .entry-list { list-style: none; margin: 10px 0 0; padding: 0; }
+  .entry-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .entry-list li:last-child { border-bottom: none; }
+  .entry-time { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .badge {
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+  .badge-0 { background: #f0fdf4; color: var(--green); }
+  .badge-1 { background: #fffbeb; color: var(--amber); }
+  .badge-2 { background: #fff7ed; color: var(--orange); }
+  .badge-3 { background: #fef2f2; color: var(--red); }
+  .entry-note { color: var(--gray); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .del-btn {
+    background: none;
+    border: none;
+    color: #b91c1c;
+    font-size: 16px;
+    padding: 6px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  /* impact */
+  .impact-grid { display: grid; gap: 8px; }
+  .impact-btn {
+    border: 2px solid var(--border);
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: left;
+    font-size: 13px;
+    color: var(--gray);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .impact-btn .imark { font-size: 18px; font-weight: 700; min-width: 32px; text-align: center; }
+  .impact-btn.selected { border-color: var(--teal); background: var(--teal-light); color: var(--teal-dark); }
+
+  /* med effect */
+  .effect-group { display: flex; gap: 6px; }
+  .effect-group button {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    border-radius: 8px;
+    padding: 8px 2px;
+    font-size: 13px;
+    color: var(--gray);
+  }
+  .effect-group button.selected { border-color: var(--teal); background: var(--teal-light); color: var(--teal-dark); font-weight: 700; }
+
+  /* tab bar */
+  nav.tabbar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 20;
+  }
+  nav.tabbar button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 10px 0 8px;
+    font-size: 11px;
+    color: var(--gray);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  nav.tabbar button .icon { font-size: 20px; line-height: 1; }
+  nav.tabbar button.active { color: var(--teal); font-weight: 700; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* history */
+  .history-day {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .history-day .hd-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .history-day .hd-date { font-weight: 700; font-size: 15px; }
+  .history-day .hd-meta { font-size: 12px; color: var(--gray); margin-top: 6px; }
+  .empty-note { text-align: center; color: var(--gray); font-size: 14px; padding: 24px 0; }
+
+  /* print view (screen preview) */
+  .print-controls .row { margin-bottom: 8px; }
+  #printSheet { background: #fff; border-radius: var(--radius); padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .psheet-title { font-size: 18px; font-weight: 800; color: var(--teal-dark); border-left: 6px solid var(--teal); padding-left: 8px; margin: 4px 0 2px; }
+  .psheet-sub { font-size: 11px; color: var(--gray); margin-bottom: 8px; }
+  table.ptable { width: 100%; border-collapse: collapse; font-size: 11px; }
+  table.ptable th, table.ptable td { border: 1px solid #94a3b8; padding: 4px; vertical-align: top; }
+  table.ptable th { background: #e8f1f5; color: var(--teal-dark); font-size: 11px; padding: 5px 4px; }
+  table.ptable td.pd-date { width: 52px; text-align: center; font-weight: 700; white-space: nowrap; }
+  table.ptable td.pd-date .dow { font-size: 10px; font-weight: normal; color: var(--gray); }
+  table.ptable td.pd-date .dow.sat { color: #2563eb; }
+  table.ptable td.pd-date .dow.sun { color: var(--red); }
+  table.ptable td.pd-tl { width: 40%; padding: 2px; }
+  table.ptable td.pd-impact { width: 44px; text-align: center; font-weight: 700; }
+  .pd-meds { margin: 0 0 2px; }
+  .pd-meds span { display: inline-block; margin-right: 6px; }
+  .pd-memo { color: #374151; white-space: pre-wrap; }
+  .pd-entrynotes { color: #374151; }
+
+  .legend { font-size: 11px; color: var(--gray); margin-top: 8px; line-height: 1.7; }
+  .legend b { color: var(--text); }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    header.appbar, nav.tabbar, .no-print { display: none !important; }
+    .container { max-width: none; padding: 0; }
+    .view { display: none !important; }
+    #view-print { display: block !important; }
+    #printSheet { box-shadow: none; border-radius: 0; padding: 0; }
+    table.ptable { font-size: 10px; }
+    table.ptable tr { break-inside: avoid; }
+    @page { size: A4 portrait; margin: 12mm; }
+  }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <h1 id="appTitle">頭痛ダイアリー</h1>
+  <div class="datenav" id="dateNav">
+    <button id="prevDay" aria-label="前の日">‹</button>
+    <input type="date" id="datePicker">
+    <button id="nextDay" aria-label="次の日">›</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ============ 記録ビュー ============ -->
+  <div class="view active" id="view-record">
+
+    <div class="card">
+      <h2>今日のタイムライン <span class="hint">記録すると自動で線が引かれます</span></h2>
+      <div class="timeline-wrap" id="timelineContainer"></div>
+    </div>
+
+    <div class="card">
+      <h2>頭痛の記録 <span class="hint">時刻と程度を選んで記録</span></h2>
+      <div class="row" style="margin-bottom:10px">
+        <div style="flex:0 0 130px">
+          <label class="field" for="entryTime">時刻</label>
+          <input type="time" id="entryTime">
+        </div>
+        <div style="flex:1">
+          <label class="field" for="entryNote">メモ(任意)</label>
+          <input type="text" id="entryNote" placeholder="ズキズキする、吐き気 など">
+        </div>
+      </div>
+      <label class="field">頭痛の程度</label>
+      <div class="level-grid" id="levelGrid">
+        <button class="level-btn" data-level="3"><span class="mark">卅</span>重度</button>
+        <button class="level-btn" data-level="2"><span class="mark">廾</span>中程度</button>
+        <button class="level-btn" data-level="1"><span class="mark">十</span>軽度</button>
+        <button class="level-btn" data-level="0"><span class="mark">✓</span>治まった</button>
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn btn-primary" id="addEntry">＋ この時刻で記録する</button>
+      </div>
+      <ul class="entry-list" id="entryList"></ul>
+    </div>
+
+    <div class="card">
+      <h2>飲んだ薬 <span class="hint">効き目も記録できます</span></h2>
+      <div class="row" style="margin-bottom:8px">
+        <div style="flex:0 0 110px">
+          <label class="field" for="medTime">時刻</label>
+          <input type="time" id="medTime">
+        </div>
+        <div style="flex:1">
+          <label class="field" for="medName">薬の名前</label>
+          <input type="text" id="medName" list="medNameList" placeholder="例: バファリン">
+          <datalist id="medNameList"></datalist>
+        </div>
+        <div style="flex:0 0 72px">
+          <label class="field" for="medCount">錠数</label>
+          <input type="number" id="medCount" min="0.5" step="0.5" value="1" inputmode="decimal">
+        </div>
+      </div>
+      <label class="field">効き目</label>
+      <div class="effect-group" id="effectGroup">
+        <button data-effect="good">○ 効いた</button>
+        <button data-effect="partial">△ やや効いた</button>
+        <button data-effect="none">× 効かなかった</button>
+        <button data-effect="unknown">− 未記入</button>
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn btn-primary" id="addMed">＋ 薬を記録する</button>
+      </div>
+      <ul class="entry-list" id="medList"></ul>
+    </div>
+
+    <div class="card">
+      <h2>日常生活への影響度</h2>
+      <div class="impact-grid" id="impactGrid">
+        <button class="impact-btn" data-impact="3"><span class="imark" style="color:var(--red)">卅</span>何も手につかず、横にならなければならない</button>
+        <button class="impact-btn" data-impact="2"><span class="imark" style="color:var(--orange)">廾</span>仕事・学校・家事の能率が通常の半分以下である</button>
+        <button class="impact-btn" data-impact="1"><span class="imark" style="color:var(--amber)">十</span>頭痛はあるが、日常生活に大きな支障はない</button>
+        <button class="impact-btn" data-impact="0"><span class="imark" style="color:var(--green)">−</span>影響なし</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>原因・きっかけメモ <span class="hint">わかれば記入(自動保存)</span></h2>
+      <textarea id="causeMemo" placeholder="例: 寝不足、天気(低気圧)、肩こり、飲酒、人混み など"></textarea>
+    </div>
+
+  </div>
+
+  <!-- ============ 履歴ビュー ============ -->
+  <div class="view" id="view-history">
+    <div id="historyList"></div>
+  </div>
+
+  <!-- ============ 印刷ビュー ============ -->
+  <div class="view" id="view-print">
+    <div class="card no-print print-controls">
+      <h2>印刷 / PDF保存</h2>
+      <div class="row">
+        <div style="flex:1">
+          <label class="field" for="printFrom">開始日</label>
+          <input type="date" id="printFrom">
+        </div>
+        <div style="flex:1">
+          <label class="field" for="printTo">終了日</label>
+          <input type="date" id="printTo">
+        </div>
+      </div>
+      <div class="row" style="margin-top:4px">
+        <button class="btn btn-outline btn-small" id="rangeThisMonth">今月</button>
+        <button class="btn btn-outline btn-small" id="rangeLastMonth">先月</button>
+        <button class="btn btn-outline btn-small" id="range2Weeks">直近2週間</button>
+      </div>
+      <button class="btn btn-primary" id="doPrint" style="margin-top:10px">🖨 印刷 / PDFに保存</button>
+      <p style="font-size:12px;color:var(--gray);margin:8px 0 0">
+        iPhoneの印刷画面で「PDFとして保存」または共有ボタンからPDFに保存できます。
+      </p>
+    </div>
+    <div id="printSheet"></div>
+  </div>
+
+  <!-- ============ 設定ビュー ============ -->
+  <div class="view" id="view-settings">
+    <div class="card">
+      <h2>データのバックアップ</h2>
+      <p style="font-size:13px;color:var(--gray)">データはこの端末のブラウザ内に保存されています。機種変更やブラウザのデータ削除に備えて、定期的に書き出しておくと安心です。</p>
+      <div class="row">
+        <button class="btn btn-outline" id="exportData" style="flex:1">書き出し</button>
+        <button class="btn btn-outline" id="importData" style="flex:1">読み込み</button>
+      </div>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+    </div>
+    <div class="card">
+      <h2>使い方</h2>
+      <p style="font-size:13px;color:var(--gray)">スクリーンショット付きの使い方マニュアルがあります。</p>
+      <a class="btn btn-outline" href="manual.html" style="display:block;text-align:center;text-decoration:none">📖 使い方マニュアルを開く</a>
+    </div>
+    <div class="card">
+      <h2>このアプリについて</h2>
+      <p style="font-size:13px;color:var(--gray);line-height:1.7">
+        紙の頭痛ダイアリー(坂井文彦先生監修版)をもとにしたWebアプリです。
+        記録した内容は印刷タブからPDF化して、受診時に医師へ見せることができます。<br>
+        程度の記号 … <b style="color:var(--red)">卅</b>=重度 / <b style="color:var(--orange)">廾</b>=中程度 / <b style="color:var(--amber)">十</b>=軽度<br>
+        薬の効き目 … ○=効いた / △=やや効いた / ×=効かなかった
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<nav class="tabbar">
+  <button data-view="record" class="active"><span class="icon">✏️</span>記録</button>
+  <button data-view="history"><span class="icon">📅</span>履歴</button>
+  <button data-view="print"><span class="icon">🖨️</span>印刷</button>
+  <button data-view="settings"><span class="icon">⚙️</span>設定</button>
+</nav>
+
+<script>
+"use strict";
+
+/* ================= データ管理 ================= */
+const STORAGE_KEY = "headache-diary-v1";
+
+function loadStore() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { /* 破損時は初期化 */ }
+  return { version: 1, days: {} };
+}
+const store = loadStore();
+
+function saveStore() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+}
+
+function getDay(dateStr, create) {
+  if (!store.days[dateStr] && create) {
+    store.days[dateStr] = { entries: [], meds: [], impact: null, memo: "" };
+  }
+  return store.days[dateStr] || { entries: [], meds: [], impact: null, memo: "" };
+}
+
+function cleanupDay(dateStr) {
+  const d = store.days[dateStr];
+  if (d && d.entries.length === 0 && d.meds.length === 0 && d.impact === null && !d.memo) {
+    delete store.days[dateStr];
+  }
+}
+
+/* ================= ユーティリティ ================= */
+const DOW = ["日", "月", "火", "水", "木", "金", "土"];
+const LEVEL_NAMES = ["治まった", "軽度", "中程度", "重度"];
+const LEVEL_MARKS = ["✓", "十", "廾", "卅"];
+const LEVEL_COLORS = ["#16a34a", "#d97706", "#ea580c", "#dc2626"];
+const IMPACT_MARKS = ["−", "十", "廾", "卅"];
+const EFFECT_LABEL = { good: "○", partial: "△", none: "×", unknown: "" };
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function nowTimeStr() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+function timeToMin(t) {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
+function fmtDate(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dow = DOW[new Date(y, m - 1, d).getDay()];
+  return `${m}/${d}(${dow})`;
+}
+function fmtDateLong(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dow = DOW[new Date(y, m - 1, d).getDay()];
+  return `${y}年${m}月${d}日(${dow})`;
+}
+function addDays(dateStr, n) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dt = new Date(y, m - 1, d + n);
+  return dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0") + "-" + String(dt.getDate()).padStart(2, "0");
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/* ================= タイムラインSVG =================
+   記録された(時刻, 程度)の点をつなぎ、階段状の線を自動描画する。
+   最後の記録が程度>0なら「継続中」として点線で右端まで伸ばす。 */
+function renderTimeline(day, opts) {
+  const compact = opts && opts.compact;
+  const W = 480;
+  const H = compact ? 64 : 118;
+  const padL = compact ? 4 : 8, padR = compact ? 4 : 8;
+  const padT = compact ? 6 : 22;
+  const axisY = H - (compact ? 14 : 24);
+  const plotW = W - padL - padR;
+  const levelY = lv => axisY - lv * ((axisY - padT) / 3);
+  const xOf = min => padL + (min / 1440) * plotW;
+
+  let svg = `<svg class="timeline" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // 程度ガイド線
+  for (let lv = 1; lv <= 3; lv++) {
+    svg += `<line x1="${padL}" y1="${levelY(lv)}" x2="${W - padR}" y2="${levelY(lv)}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="2 3"/>`;
+    if (!compact) {
+      svg += `<text x="${padL + 1}" y="${levelY(lv) - 3}" font-size="9" fill="#9ca3af">${LEVEL_MARKS[lv]} ${LEVEL_NAMES[lv]}</text>`;
+    }
+  }
+  // 時間軸
+  svg += `<line x1="${padL}" y1="${axisY}" x2="${W - padR}" y2="${axisY}" stroke="#94a3b8" stroke-width="1.5"/>`;
+  for (let h = 0; h <= 24; h += 3) {
+    const x = xOf(h * 60);
+    svg += `<line x1="${x}" y1="${axisY}" x2="${x}" y2="${axisY + 4}" stroke="#94a3b8" stroke-width="1"/>`;
+    svg += `<text x="${x}" y="${axisY + (compact ? 12 : 16)}" font-size="${compact ? 9 : 10}" fill="#6b7280" text-anchor="middle">${h}</text>`;
+  }
+
+  const entries = [...day.entries].sort((a, b) => timeToMin(a.time) - timeToMin(b.time));
+
+  // 階段状の線を描画
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i];
+    const x1 = xOf(timeToMin(e.time));
+    const y = levelY(e.level);
+    const color = LEVEL_COLORS[e.level];
+    const isLast = i === entries.length - 1;
+    const x2 = isLast ? W - padR : xOf(timeToMin(entries[i + 1].time));
+
+    if (e.level > 0) {
+      // 水平線(継続中の最終区間は点線)
+      svg += `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${color}" stroke-width="3" stroke-linecap="round"${isLast ? ' stroke-dasharray="6 5" opacity="0.65"' : ""}/>`;
+    }
+    // 次の点への縦の接続線
+    if (!isLast) {
+      const yNext = levelY(entries[i + 1].level);
+      if (yNext !== y) {
+        svg += `<line x1="${x2}" y1="${y}" x2="${x2}" y2="${yNext}" stroke="#cbd5e1" stroke-width="1.5"/>`;
+      }
+    }
+    // 記録点
+    svg += `<circle cx="${x1}" cy="${y}" r="${compact ? 3.5 : 5}" fill="${color}"/>`;
+    if (!compact) {
+      svg += `<text x="${x1}" y="${y - 9}" font-size="9" fill="${color}" text-anchor="middle" font-weight="bold">${e.time}</text>`;
+    }
+  }
+
+  // 薬のマーク(💊は環境差があるので図形で)
+  for (const m of (day.meds || [])) {
+    if (!m.time) continue;
+    const x = xOf(timeToMin(m.time));
+    const y = axisY - (compact ? 5 : 7);
+    svg += `<rect x="${x - 4}" y="${y - 4}" width="8" height="8" rx="2" fill="#0e7490"/>`;
+    svg += `<text x="${x}" y="${y + 2.5}" font-size="7" fill="#fff" text-anchor="middle" font-weight="bold">薬</text>`;
+  }
+
+  if (entries.length === 0 && (!day.meds || day.meds.length === 0) && !compact) {
+    svg += `<text x="${W / 2}" y="${H / 2 - 6}" font-size="12" fill="#9ca3af" text-anchor="middle">まだ記録がありません</text>`;
+  }
+
+  svg += `</svg>`;
+  return svg;
+}
+
+/* ================= 記録ビュー ================= */
+let currentDate = todayStr();
+let selectedLevel = null;
+let selectedEffect = "unknown";
+
+const $ = id => document.getElementById(id);
+
+function renderRecordView() {
+  $("datePicker").value = currentDate;
+  const day = getDay(currentDate, false);
+
+  $("timelineContainer").innerHTML = renderTimeline(day, { compact: false });
+
+  // 頭痛記録リスト
+  const entries = [...day.entries].sort((a, b) => timeToMin(a.time) - timeToMin(b.time));
+  $("entryList").innerHTML = entries.map(e => {
+    const idx = day.entries.indexOf(e);
+    return `<li>
+      <span class="entry-time">${e.time}</span>
+      <span class="badge badge-${e.level}">${LEVEL_MARKS[e.level]} ${LEVEL_NAMES[e.level]}</span>
+      <span class="entry-note">${escapeHtml(e.note || "")}</span>
+      <button class="del-btn" data-del-entry="${idx}" aria-label="削除">✕</button>
+    </li>`;
+  }).join("");
+
+  // 薬リスト
+  const meds = [...day.meds].sort((a, b) => timeToMin(a.time || "00:00") - timeToMin(b.time || "00:00"));
+  $("medList").innerHTML = meds.map(m => {
+    const idx = day.meds.indexOf(m);
+    const eff = EFFECT_LABEL[m.effect] || "";
+    return `<li>
+      <span class="entry-time">${m.time || "--:--"}</span>
+      <span style="font-weight:600">${escapeHtml(m.name)}</span>
+      <span style="color:var(--gray)">${m.count}錠</span>
+      ${eff ? `<span class="badge" style="background:var(--teal-light);color:var(--teal-dark)">${eff}</span>` : ""}
+      <button class="del-btn" data-del-med="${idx}" aria-label="削除">✕</button>
+    </li>`;
+  }).join("");
+
+  // 影響度
+  document.querySelectorAll("#impactGrid .impact-btn").forEach(b => {
+    b.classList.toggle("selected", day.impact !== null && Number(b.dataset.impact) === day.impact);
+  });
+
+  // メモ
+  if ($("causeMemo").value !== (day.memo || "")) $("causeMemo").value = day.memo || "";
+}
+
+function refreshMedDatalist() {
+  const names = new Set();
+  for (const d of Object.values(store.days)) {
+    for (const m of d.meds || []) names.add(m.name);
+  }
+  $("medNameList").innerHTML = [...names].map(n => `<option value="${escapeHtml(n)}">`).join("");
+}
+
+/* --- イベント: 日付 --- */
+$("datePicker").addEventListener("change", e => {
+  if (e.target.value) { currentDate = e.target.value; renderRecordView(); }
+});
+$("prevDay").addEventListener("click", () => { currentDate = addDays(currentDate, -1); renderRecordView(); });
+$("nextDay").addEventListener("click", () => { currentDate = addDays(currentDate, 1); renderRecordView(); });
+
+/* --- イベント: 程度選択 --- */
+$("levelGrid").addEventListener("click", e => {
+  const btn = e.target.closest(".level-btn");
+  if (!btn) return;
+  const lv = Number(btn.dataset.level);
+  selectedLevel = selectedLevel === lv ? null : lv;
+  document.querySelectorAll("#levelGrid .level-btn").forEach(b => {
+    b.className = "level-btn" + (selectedLevel !== null && Number(b.dataset.level) === selectedLevel ? ` sel-${selectedLevel}` : "");
+  });
+});
+
+/* --- イベント: 頭痛記録追加 --- */
+$("addEntry").addEventListener("click", () => {
+  if (selectedLevel === null) { alert("頭痛の程度を選んでください"); return; }
+  const time = $("entryTime").value || nowTimeStr();
+  const day = getDay(currentDate, true);
+  day.entries.push({ time, level: selectedLevel, note: $("entryNote").value.trim() });
+  saveStore();
+  $("entryNote").value = "";
+  $("entryTime").value = "";
+  renderRecordView();
+});
+
+/* --- イベント: 記録削除 --- */
+document.addEventListener("click", e => {
+  const delEntry = e.target.closest("[data-del-entry]");
+  if (delEntry) {
+    const day = getDay(currentDate, false);
+    day.entries.splice(Number(delEntry.dataset.delEntry), 1);
+    cleanupDay(currentDate); saveStore(); renderRecordView();
+    return;
+  }
+  const delMed = e.target.closest("[data-del-med]");
+  if (delMed) {
+    const day = getDay(currentDate, false);
+    day.meds.splice(Number(delMed.dataset.delMed), 1);
+    cleanupDay(currentDate); saveStore(); renderRecordView(); refreshMedDatalist();
+  }
+});
+
+/* --- イベント: 効き目選択 --- */
+$("effectGroup").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-effect]");
+  if (!btn) return;
+  selectedEffect = btn.dataset.effect;
+  document.querySelectorAll("#effectGroup button").forEach(b =>
+    b.classList.toggle("selected", b.dataset.effect === selectedEffect));
+});
+
+/* --- イベント: 薬追加 --- */
+$("addMed").addEventListener("click", () => {
+  const name = $("medName").value.trim();
+  if (!name) { alert("薬の名前を入力してください"); return; }
+  const count = parseFloat($("medCount").value) || 1;
+  const time = $("medTime").value || nowTimeStr();
+  const day = getDay(currentDate, true);
+  day.meds.push({ time, name, count, effect: selectedEffect });
+  saveStore();
+  $("medName").value = "";
+  $("medTime").value = "";
+  $("medCount").value = "1";
+  selectedEffect = "unknown";
+  document.querySelectorAll("#effectGroup button").forEach(b => b.classList.remove("selected"));
+  renderRecordView();
+  refreshMedDatalist();
+});
+
+/* --- イベント: 影響度 --- */
+$("impactGrid").addEventListener("click", e => {
+  const btn = e.target.closest(".impact-btn");
+  if (!btn) return;
+  const v = Number(btn.dataset.impact);
+  const day = getDay(currentDate, true);
+  day.impact = day.impact === v ? null : v;
+  cleanupDay(currentDate);
+  saveStore();
+  renderRecordView();
+});
+
+/* --- イベント: 原因メモ(自動保存) --- */
+let memoTimer = null;
+$("causeMemo").addEventListener("input", e => {
+  clearTimeout(memoTimer);
+  memoTimer = setTimeout(() => {
+    const day = getDay(currentDate, true);
+    day.memo = e.target.value;
+    cleanupDay(currentDate);
+    saveStore();
+  }, 400);
+});
+
+/* ================= 履歴ビュー ================= */
+function renderHistory() {
+  const dates = Object.keys(store.days).sort().reverse();
+  if (dates.length === 0) {
+    $("historyList").innerHTML = `<div class="empty-note">まだ記録がありません。<br>「記録」タブから頭痛を記録してみましょう。</div>`;
+    return;
+  }
+  $("historyList").innerHTML = dates.map(dateStr => {
+    const day = store.days[dateStr];
+    const maxLevel = day.entries.length ? Math.max(...day.entries.map(e => e.level)) : null;
+    const medsTxt = (day.meds || []).map(m => `${escapeHtml(m.name)}${m.count}錠${EFFECT_LABEL[m.effect] || ""}`).join("、");
+    return `<div class="history-day" data-goto="${dateStr}">
+      <div class="hd-head">
+        <span class="hd-date">${fmtDateLong(dateStr)}</span>
+        ${maxLevel !== null && maxLevel > 0 ? `<span class="badge badge-${maxLevel}">最大 ${LEVEL_MARKS[maxLevel]} ${LEVEL_NAMES[maxLevel]}</span>` : ""}
+      </div>
+      ${renderTimeline(day, { compact: true })}
+      <div class="hd-meta">
+        ${day.impact !== null ? `影響度: ${IMPACT_MARKS[day.impact]}　` : ""}
+        ${medsTxt ? `薬: ${medsTxt}　` : ""}
+        ${day.memo ? `メモ: ${escapeHtml(day.memo)}` : ""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+$("historyList").addEventListener("click", e => {
+  const card = e.target.closest("[data-goto]");
+  if (!card) return;
+  currentDate = card.dataset.goto;
+  switchView("record");
+  renderRecordView();
+});
+
+/* ================= 印刷ビュー ================= */
+function setRange(from, to) {
+  $("printFrom").value = from;
+  $("printTo").value = to;
+  renderPrintSheet();
+}
+
+function initPrintRange() {
+  const t = todayStr();
+  const [y, m] = t.split("-").map(Number);
+  const first = `${y}-${String(m).padStart(2, "0")}-01`;
+  const lastDay = new Date(y, m, 0).getDate();
+  const last = `${y}-${String(m).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+  setRange(first, last);
+}
+
+$("rangeThisMonth").addEventListener("click", initPrintRange);
+$("rangeLastMonth").addEventListener("click", () => {
+  const t = todayStr();
+  let [y, m] = t.split("-").map(Number);
+  m -= 1; if (m === 0) { m = 12; y -= 1; }
+  const lastDay = new Date(y, m, 0).getDate();
+  setRange(`${y}-${String(m).padStart(2, "0")}-01`, `${y}-${String(m).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`);
+});
+$("range2Weeks").addEventListener("click", () => setRange(addDays(todayStr(), -13), todayStr()));
+$("printFrom").addEventListener("change", renderPrintSheet);
+$("printTo").addEventListener("change", renderPrintSheet);
+$("doPrint").addEventListener("click", () => window.print());
+
+function renderPrintSheet() {
+  const from = $("printFrom").value, to = $("printTo").value;
+  if (!from || !to || from > to) { $("printSheet").innerHTML = ""; return; }
+
+  let rows = "";
+  let d = from;
+  let guard = 0;
+  while (d <= to && guard < 370) {
+    guard++;
+    const day = store.days[d];
+    const [, , dd] = d.split("-").map(Number);
+    const [y2, m2] = d.split("-").map(Number);
+    const dowIdx = new Date(y2, m2 - 1, dd).getDay();
+    const dowCls = dowIdx === 0 ? "sun" : dowIdx === 6 ? "sat" : "";
+
+    if (day) {
+      const medsHtml = (day.meds || []).length
+        ? `<div class="pd-meds">${day.meds.map(m =>
+            `<span>💊${escapeHtml(m.name)} ${m.count}錠 ${EFFECT_LABEL[m.effect] || ""}${m.time ? `(${m.time})` : ""}</span>`).join("")}</div>`
+        : "";
+      const entryNotes = day.entries.filter(e => e.note).map(e => `${e.time} ${escapeHtml(e.note)}`).join(" / ");
+      rows += `<tr>
+        <td class="pd-date">${d.split("-")[1]}/${dd}<br><span class="dow ${dowCls}">(${DOW[dowIdx]})</span></td>
+        <td class="pd-tl">${renderTimeline(day, { compact: true })}</td>
+        <td class="pd-impact" style="color:${day.impact ? LEVEL_COLORS[day.impact] : "#9ca3af"}">${day.impact !== null ? IMPACT_MARKS[day.impact] : "−"}</td>
+        <td>${medsHtml}${entryNotes ? `<div class="pd-entrynotes">${entryNotes}</div>` : ""}${day.memo ? `<div class="pd-memo">${escapeHtml(day.memo)}</div>` : ""}</td>
+      </tr>`;
+    } else {
+      rows += `<tr>
+        <td class="pd-date">${d.split("-")[1]}/${dd}<br><span class="dow ${dowCls}">(${DOW[dowIdx]})</span></td>
+        <td class="pd-tl"></td>
+        <td class="pd-impact" style="color:#d1d5db">−</td>
+        <td></td>
+      </tr>`;
+    }
+    d = addDays(d, 1);
+  }
+
+  $("printSheet").innerHTML = `
+    <div class="psheet-title">頭痛ダイアリー</div>
+    <div class="psheet-sub">${fmtDateLong(from)} 〜 ${fmtDateLong(to)}</div>
+    <table class="ptable">
+      <thead><tr>
+        <th>日付</th><th>頭痛の程度(0〜24時)</th><th>影響度</th><th>薬・メモ</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="legend">
+      <b>頭痛の程度</b>: <span style="color:#dc2626">卅 重度</span> / <span style="color:#ea580c">廾 中程度</span> / <span style="color:#d97706">十 軽度</span>(線の高さが程度、点線は継続中)
+      <b>影響度</b>: 卅 何も手につかず横になる必要 / 廾 能率が半分以下 / 十 大きな支障なし
+      <b>薬の効果</b>: ○ 効いた / △ やや効いた / × 効かなかった
+    </div>`;
+}
+
+/* ================= 設定ビュー ================= */
+$("exportData").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(store, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `headache-diary-${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+$("importData").addEventListener("click", () => $("importFile").click());
+$("importFile").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data || typeof data.days !== "object") throw new Error("形式が違います");
+      if (!confirm("現在のデータに読み込んだデータを統合します。よろしいですか?\n(同じ日付は読み込んだデータで上書きされます)")) return;
+      Object.assign(store.days, data.days);
+      saveStore();
+      renderRecordView(); renderHistory(); refreshMedDatalist();
+      alert("読み込みました");
+    } catch (err) {
+      alert("読み込みに失敗しました: " + err.message);
+    }
+    e.target.value = "";
+  };
+  reader.readAsText(file);
+});
+
+/* ================= タブ切り替え ================= */
+function switchView(name) {
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + name));
+  document.querySelectorAll("nav.tabbar button").forEach(b => b.classList.toggle("active", b.dataset.view === name));
+  $("dateNav").style.visibility = name === "record" ? "visible" : "hidden";
+  if (name === "history") renderHistory();
+  if (name === "print") renderPrintSheet();
+}
+document.querySelectorAll("nav.tabbar button").forEach(b =>
+  b.addEventListener("click", () => switchView(b.dataset.view)));
+
+/* ================= 初期化 ================= */
+renderRecordView();
+refreshMedDatalist();
+initPrintRange();
+switchView("record");
+</script>
+</body>
+</html>
