@@ -1,0 +1,5 @@
+# Xcode
+ios/HeadacheDiary/**/xcuserdata/
+ios/HeadacheDiary/**/DerivedData/
+ios/HeadacheDiary/**/*.xcuserstate
+ios/HeadacheDiary/**/*.xcscmblueprint
