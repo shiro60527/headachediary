@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>頭痛ダイアリー 使い方マニュアル</title>
+<style>
+  :root {
+    --teal: #0e7490;
+    --teal-dark: #155e75;
+    --teal-light: #ecfeff;
+    --gray: #6b7280;
+    --border: #d9e2e8;
+    --text: #1f2937;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    color: var(--text);
+    background: #f3f6f8;
+    line-height: 1.8;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 16px 16px 48px; }
+  header.top {
+    background: var(--teal);
+    color: #fff;
+    padding: 28px 16px;
+    text-align: center;
+  }
+  header.top h1 { margin: 0 0 6px; font-size: 24px; }
+  header.top p { margin: 0; font-size: 14px; opacity: .9; }
+  nav.toc {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    font-size: 14px;
+  }
+  nav.toc ol { margin: 8px 0 0; padding-left: 22px; }
+  nav.toc a { color: var(--teal); text-decoration: none; }
+  section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  h2 {
+    font-size: 19px;
+    color: var(--teal-dark);
+    border-left: 6px solid var(--teal);
+    padding-left: 10px;
+    margin: 0 0 12px;
+  }
+  h3 { font-size: 15px; color: var(--teal-dark); margin: 20px 0 8px; }
+  p, li { font-size: 15px; }
+  figure { margin: 12px 0; text-align: center; }
+  figure img {
+    max-width: 100%;
+    width: 340px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  figure img.wide { width: 100%; max-width: 480px; }
+  figcaption { font-size: 12px; color: var(--gray); margin-top: 6px; }
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps > li {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 10px;
+  }
+  .steps > li::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 0; top: 2px;
+    width: 26px; height: 26px;
+    background: var(--teal);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .note {
+    background: var(--teal-light);
+    border-left: 4px solid var(--teal);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    margin: 12px 0;
+  }
+  .warn {
+    background: #fef2f2;
+    border-left: 4px solid #dc2626;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    margin: 12px 0;
+  }
+  table.legend { border-collapse: collapse; width: 100%; font-size: 14px; }
+  table.legend th, table.legend td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+  table.legend th { background: #e8f1f5; color: var(--teal-dark); white-space: nowrap; }
+  .mark { font-weight: 700; font-size: 16px; }
+  .back {
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--teal);
+    font-weight: 700;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>頭痛ダイアリー 使い方マニュアル</h1>
+  <p>スマホで記入できる頭痛ダイアリー ─ 記録した内容はPDFにして医師に見せられます</p>
+</header>
+
+<div class="wrap">
+
+<nav class="toc">
+  <b>もくじ</b>
+  <ol>
+    <li><a href="#about">画面の見かた</a></li>
+    <li><a href="#record">頭痛を記録する(自動で線が引かれます)</a></li>
+    <li><a href="#med">飲んだ薬を記録する</a></li>
+    <li><a href="#impact">影響度・原因メモを記録する</a></li>
+    <li><a href="#past">過去の日付の記録・修正</a></li>
+    <li><a href="#history">履歴を見る</a></li>
+    <li><a href="#print">印刷・PDFに保存する</a></li>
+    <li><a href="#backup">データのバックアップ</a></li>
+    <li><a href="#legend">記号の意味(早見表)</a></li>
+  </ol>
+</nav>
+
+<section id="about">
+  <h2>1. 画面の見かた</h2>
+  <p>アプリを開くと「記録」画面が表示されます。画面下のタブで4つの画面を切り替えます。</p>
+  <figure>
+    <img src="01_record_top.png" alt="記録画面の全体">
+    <figcaption>起動直後の「記録」画面。上のタイムラインに、その日の頭痛の経過が線で表示されます</figcaption>
+  </figure>
+  <figure>
+    <img src="03_tabbar.png" alt="タブバー" class="wide">
+    <figcaption>画面下のタブ ─ <b>記録</b>(毎日の記入)/<b>履歴</b>(過去の一覧)/<b>印刷</b>(PDF化)/<b>設定</b>(バックアップ)</figcaption>
+  </figure>
+</section>
+
+<section id="record">
+  <h2>2. 頭痛を記録する</h2>
+  <p>紙のダイアリーの「午前・午後・夜」の代わりに、<b>時刻を指定して記録</b>します。記録するたびに、タイムラインへ自動で線が引かれます。</p>
+  <ol class="steps">
+    <li><b>時刻</b>を入力します(初期状態では現在時刻が入っています)</li>
+    <li>必要なら<b>メモ</b>を書きます(ズキズキする、吐き気がある など)</li>
+    <li><b>頭痛の程度</b>(卅 重度/廾 中程度/十 軽度)をタップして選びます</li>
+    <li><b>「＋ この時刻で記録する」</b>をタップします</li>
+  </ol>
+  <figure>
+    <img src="04_entry_input.png" alt="頭痛の記録入力">
+    <figcaption>時刻 08:30・メモ・程度「十 軽度」を選んだところ</figcaption>
+  </figure>
+  <figure>
+    <img src="05_timeline_first.png" alt="1件記録後のタイムライン" class="wide">
+    <figcaption>記録すると自動で線が引かれます。線の高さ=程度、右端までの点線は「まだ続いている」という意味です</figcaption>
+  </figure>
+
+  <h3>痛みが強くなった/治まったときも、そのつど記録</h3>
+  <p>程度が変わったら同じ手順で記録してください。線の高さが変わってつながります。<b>痛みが治まったら「✓ 治まった」を記録</b>すると線が終わります。</p>
+  <figure>
+    <img src="06_timeline_full.png" alt="1日分のタイムライン" class="wide">
+    <figcaption>8:30 軽度 → 13:00 重度 → 18:00 治まった、と記録した例</figcaption>
+  </figure>
+  <figure>
+    <img src="07_entry_list.png" alt="記録の一覧と削除ボタン">
+    <figcaption>記録は下に一覧表示されます。間違えたら右の「✕」で削除して記録し直せます</figcaption>
+  </figure>
+  <div class="note">「治まった」を記録しない日は、タイムラインの線が右端まで点線(継続中)で表示されます。寝る前などに忘れず記録するのがおすすめです。</div>
+</section>
+
+<section id="med">
+  <h2>3. 飲んだ薬を記録する</h2>
+  <ol class="steps">
+    <li>飲んだ<b>時刻</b>を入力します(初期状態では現在時刻が入っています)</li>
+    <li><b>薬の名前</b>を入力します(一度入力した薬は、次から候補チップに出ます)</li>
+    <li><b>錠数</b>を入力します(0.5錠刻みで入力できます)</li>
+    <li><b>効き目</b>を選びます ─ ○ 効いた/△ やや効いた/× 効かなかった(あとで分かってからでもOK。その場合は「− 未記入」のまま記録し、後で✕で消して記録し直してください)</li>
+    <li><b>「＋ 薬を記録する」</b>をタップします</li>
+  </ol>
+  <figure>
+    <img src="08_med_input.png" alt="薬の入力">
+    <figcaption>13:15 に ロキソニン 1錠・効き目「○ 効いた」を入力したところ</figcaption>
+  </figure>
+  <figure>
+    <img src="09_med_added.png" alt="薬の記録一覧">
+    <figcaption>記録した薬は下に一覧表示され、タイムラインにも「薬」マークが付きます</figcaption>
+  </figure>
+</section>
+
+<section id="impact">
+  <h2>4. 影響度・原因メモを記録する</h2>
+  <h3>日常生活への影響度</h3>
+  <p>その日の頭痛が生活にどれくらい影響したかを、あてはまるものをタップして選びます(1日1つ)。</p>
+  <figure>
+    <img src="10_impact.png" alt="影響度の選択">
+    <figcaption>「廾 仕事・学校・家事の能率が通常の半分以下である」を選んだ例。もう一度タップすると解除できます</figcaption>
+  </figure>
+  <h3>原因・きっかけメモ</h3>
+  <p>思いあたる原因(寝不足、天気、肩こり、飲酒など)があれば書いておきましょう。<b>入力すると自動で保存されます</b>(保存ボタンはありません)。</p>
+  <figure>
+    <img src="11_memo.png" alt="原因メモ">
+  </figure>
+</section>
+
+<section id="past">
+  <h2>5. 過去の日付の記録・修正</h2>
+  <p>画面上部の日付の左右にある <b>「‹」「›」ボタン</b>で前の日・次の日に移動できます。日付部分をタップするとカレンダーから選べます。記録し忘れた日への追記や、過去の記録の修正(✕で消して記録し直す)ができます。</p>
+  <figure>
+    <img src="02_datenav.png" alt="日付ナビゲーション" class="wide">
+  </figure>
+</section>
+
+<section id="history">
+  <h2>6. 履歴を見る</h2>
+  <p>「履歴」タブでは、記録のある日が新しい順に並びます。各日のタイムライン・その日の最大の程度・影響度・薬・メモをまとめて確認できます。<b>日付をタップするとその日の記録画面に移動</b>して修正できます。</p>
+  <figure>
+    <img src="12_history.png" alt="履歴画面">
+    <figcaption>7/14 のように「治まった」の記録がない日は点線(継続中)で表示されます</figcaption>
+  </figure>
+</section>
+
+<section id="print">
+  <h2>7. 印刷・PDFに保存する</h2>
+  <p>「印刷」タブで期間を選ぶと、紙のダイアリーのような一覧表が作られます。受診時に医師へ見せる場合は、通院間隔に合わせて「今月」「先月」「直近2週間」ボタンが便利です。</p>
+  <figure>
+    <img src="13_print_controls.png" alt="印刷の設定">
+  </figure>
+  <figure>
+    <img src="14_print_sheet.png" alt="印刷プレビュー">
+    <figcaption>作成される一覧表。記録のない日は空欄になります</figcaption>
+  </figure>
+  <h3>PDFに保存する・印刷する手順</h3>
+  <ol class="steps">
+    <li>「印刷 / PDFに保存」ボタンをタップすると、PDFが作成されて共有シートが開きます</li>
+    <li>共有シートの<b>「"ファイル"に保存」</b>を選ぶと、PDFとして「ファイル」アプリに保存されます</li>
+    <li>その場でプリンタに印刷したい場合は、共有シートの<b>「プリント」</b>をタップすると、AirPrint対応プリンタで印刷できます</li>
+    <li>メールやLINEなどで送りたい場合も、共有シートからそのまま送信できます</li>
+  </ol>
+  <div class="note">保存したPDFは「ファイル」アプリに入ります。メールやLINEで送ったり、自宅・コンビニのプリンタで印刷したりできます。</div>
+</section>
+
+<section id="backup">
+  <h2>8. データのバックアップ</h2>
+  <p>記録はこの端末の中に保存されており、<b>インターネットには一切送信されません</b>。その代わり、アプリを削除すると記録も一緒に消えてしまいます。</p>
+  <figure>
+    <img src="15_settings.png" alt="設定画面">
+  </figure>
+  <ul>
+    <li><b>書き出し</b> … 全記録を1つのファイル(JSON)として共有シートから保存します。定期的に実行して「ファイル」アプリ等に保管してください</li>
+    <li><b>読み込み</b> … 書き出したファイルを選ぶと記録が復元されます(機種変更のときはこれを使います)</li>
+  </ul>
+  <div class="warn">アプリを削除(アンインストール)すると記録は消えます。機種変更や万一の故障に備えて、月に1回など定期的な書き出しをおすすめします。</div>
+</section>
+
+<section id="legend">
+  <h2>9. 記号の意味(早見表)</h2>
+  <table class="legend">
+    <tr><th rowspan="3">頭痛の程度</th><td><span class="mark" style="color:#dc2626">卅</span> 重度</td></tr>
+    <tr><td><span class="mark" style="color:#ea580c">廾</span> 中程度</td></tr>
+    <tr><td><span class="mark" style="color:#d97706">十</span> 軽度 (タイムラインでは線の高さと色で表されます。点線=継続中)</td></tr>
+    <tr><th rowspan="3">影響度</th><td><span class="mark" style="color:#dc2626">卅</span> 何も手につかず、横にならなければならない</td></tr>
+    <tr><td><span class="mark" style="color:#ea580c">廾</span> 仕事・学校・家事の能率が通常の半分以下である</td></tr>
+    <tr><td><span class="mark" style="color:#d97706">十</span> 頭痛はあるが、日常生活に大きな支障はない</td></tr>
+    <tr><th rowspan="3">薬の効果</th><td><span class="mark">○</span> 効いた</td></tr>
+    <tr><td><span class="mark">△</span> やや効いた</td></tr>
+    <tr><td><span class="mark">×</span> 効かなかった</td></tr>
+  </table>
+  <p style="font-size:12px;color:var(--gray)">記号は紙の頭痛ダイアリー(坂井文彦先生監修版)と同じ意味です。</p>
+  <a class="back" href="headachediary-app://close">← 閉じる</a>
+</section>
+
+</div>
+</body>
+</html>
