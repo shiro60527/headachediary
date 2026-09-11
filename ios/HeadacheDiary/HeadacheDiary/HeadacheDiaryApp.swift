@@ -2,8 +2,6 @@
 //  HeadacheDiaryApp.swift
 //  HeadacheDiary
 //
-//  Created by Hiroshi Murakami on 2026/09/11.
-//
 
 import SwiftUI
 import SwiftData
@@ -11,13 +9,13 @@ import SwiftData
 @main
 struct HeadacheDiaryApp: App {
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
+        let configuration = ModelConfiguration(schema: Schema(versionedSchema: HeadacheDiarySchemaV1.self), isStoredInMemoryOnly: false)
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            return try ModelContainer(
+                for: Schema(versionedSchema: HeadacheDiarySchemaV1.self),
+                migrationPlan: HeadacheDiaryMigrationPlan.self,
+                configurations: [configuration]
+            )
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
@@ -25,7 +23,7 @@ struct HeadacheDiaryApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
         }
         .modelContainer(sharedModelContainer)
     }

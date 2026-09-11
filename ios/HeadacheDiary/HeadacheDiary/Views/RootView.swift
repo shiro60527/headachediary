@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct RootView: View {
     @State private var appState = AppState()
@@ -31,6 +32,7 @@ struct RootView: View {
         }
         .tint(DesignConstants.teal)
         .environment(appState)
+        .environment(\.locale, Locale(identifier: "ja_JP"))
     }
 }
 
